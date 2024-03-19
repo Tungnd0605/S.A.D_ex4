@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ book.title }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .image-preview {
+            max-wid: 200px;
+            max-height: 200px;
+        }
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+        }
+
+        .rating label:before {
+            content: "\2606"; /* Empty star */
+        }
+
+        .rating input:checked ~ label:before {
+            content: "\2605"; /* Filled star */
+        }
+
+        #comment {
+            width: 100%;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Book Detail</h2>
+        <form id="bookForm">
+            <div class="row">
+                <!-- Right column -->
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label for="title" class="col-sm-2 col-form-label">Title:</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" readonly>
+                        </div>
+                        <label for="author" class="col-sm-2 col-form-label">Author:</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="author" name="author" value="{{ book.author }}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="price" class="col-sm-2 col-form-label">Price:</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="price" name="price" value="{{ book.price }}" readonly>
+                        </div>
+                        <label for="type" class="col-sm-2 col-form-label">Type:</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="type" name="type" value="{{ book.type }}" readonly>
+                        </div>
+                    </div>
+					<div class="form-group row">
+                        <label for="stock" class="col-sm-2 col-form-label">Stock:</label>
+                        <div class="col-sm-4">
+                            <input type="number" class="form-control" id="stock" name="stock" value="{{ book.stock }}" readonly>
+                        </div>
+                        <label for="sold" class="col-sm-2 col-form-label">Sold:</label>
+                        <div class="col-sm-4">
+                            <input type="number" class="form-control" id="sold" name="sold" value="{{ book.sold }}" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Left column -->
+                <div class="col-md-6">
+					<label for="cover" class="col-sm-2 col-form-label">Book Cover</label>
+                    <img src="{{ book.cover }}" width="300px" height="450px">
+                </div>
+            </div>
+
+
+            <div class="row justify-content-center">
+                <a href="/" class="btn btn-info">Return</a>
+            </div>
+        </form>
+        <form id="addToCartForm" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="product_type" value="book">
+            <input type="hidden" name="product_id" value="{{ book.id }}">
+            <input type="number" name="quantity" value="1" min="1"> <!-- You can adjust the quantity if needed -->
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+        </form>
+
+
+
+
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById("addToCartForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var form = this;
+            var productType = form.querySelector('input[name="product_type"]').value;
+            var productId = form.querySelector('input[name="product_id"]').value;
+            var quantity = form.querySelector('input[name="quantity"]').value;
+
+            var url = `/add/${productType}/${productId}/${quantity}/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: new FormData(form)
+            })
+            .then(response => {
+                // Handle response as needed
+                console.log(response);
+                if (response.ok) {
+                    window.location.href = '/cart'; // Redirect to the cart page
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+
+</body>
+</html>
